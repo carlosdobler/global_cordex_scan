@@ -1,4 +1,5 @@
-
+library(zoo)
+library(imputeTS)
 
 func_plot_ts_raw <- function(x, dates, bkpt = NA){
   
@@ -37,11 +38,11 @@ func_retrieve_ts <- function(rcm, gcm, vv, lon, lat){
     .[str_detect(., gcm)] %>% 
     read_stars(proxy = T) -> s
   
-  s %>% st_get_dimension_values("x") -> coords_lon
-  s %>% st_get_dimension_values("y") -> coords_lat
+  s %>% st_get_dimension_values("x", center = F) -> coords_lon
+  s %>% st_get_dimension_values("y", center = F) -> coords_lat
   
-  which(near(coords_lon, lon)) -> pos_lon
-  which(near(coords_lat, lat)) -> pos_lat
+  which.min(abs(coords_lon - as.vector(lon))) -> pos_lon
+  which.min(abs(coords_lat - as.vector(lat))) -> pos_lat
   
   s[,pos_lon,pos_lat,] %>% 
     st_as_stars() %>% 

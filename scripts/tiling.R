@@ -124,6 +124,9 @@ imap(lon_chunks, function(lon_ch, lon_i){
     s_proxy_sub %>%
       mutate(aa = 1) %>% 
       select(aa) %>%
+      st_set_dimensions("lon", values = st_get_dimension_values(., "lon") %>% round(1)) %>% 
+      st_set_dimensions("lat", values = st_get_dimension_values(., "lat") %>% round(1)) %>%
+      st_set_crs(4326) %>% 
       st_as_sf(as_points = F, merge = T) %>%
       mutate(lon_ch = lon_i,
              lat_ch = lat_i) -> pol_tile

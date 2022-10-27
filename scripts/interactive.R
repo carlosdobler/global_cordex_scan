@@ -108,17 +108,18 @@ tb_allvars_allmods %>%
 
 v = "tasmin"
 
-l_tb_pred %>%
-  pluck(v) %>% 
-  pluck(m) %>% 
-  filter(b > 0.9) %>% 
-  slice_sample() -> tb
-
 {
+  l_tb_pred %>%
+    # pluck(v) %>%
+    pluck(2) %>% # pluck(m) %>%
+    filter(b > 0.75) %>%
+    slice_sample() -> tb
+  
+  
   tb$model %>% 
     str_split("_", simplify = T) -> m
   
-  func_retrieve_ts(m[,1], m[,2], v, tb$x, tb$y) -> t
+  func_retrieve_ts(m[,1], m[,2], v, tb$lon, tb$lat) -> t
   
   func_jump_7(t$val, t$time) -> a 
   
@@ -132,6 +133,40 @@ l_tb_pred %>%
   func_plot_ts_raw(t$val, t$time, as_date(a[1])) +
     labs(title = str_glue("VAR: {str_to_upper(v)}  //  MOD: {tb$model}"))
 }
+
+
+
+s_tb %>% 
+  filter(b > 0.5 & b < 0.7) %>%
+  slice_sample() -> tb
+
+{
+  
+  func_retrieve_ts("RegCM4", mod, v, tb$lon, tb$lat) -> t
+  
+  func_jump_7(t$val, t$time) -> a 
+  
+  which(t$time == as_date(a[1])) -> bkpt
+  {bkpt-12*40} %>% 
+    {ifelse(.<0, 0, .)} -> lim1
+  t$val[lim1:(bkpt+12*40)] %>% 
+    quantile(c(0.005, 0.995), na.rm = T) -> lim
+  t$val[t$val < lim[1] | t$val > lim[2]] <- NA
+  
+  func_plot_ts_raw(t$val, t$time, as_date(a[1])) +
+    labs(title = str_glue("VAR: {str_to_upper(v)}  //  MOD: {tb$model}"))
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
